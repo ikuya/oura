@@ -1,77 +1,77 @@
 # oura
 
-Oura Ring API v2 の CLI ラッパースクリプト。睡眠・レディネス・心拍数・体温データを取得できる。
+A CLI wrapper for the Oura Ring API v2. Retrieves sleep, readiness, heart rate, and body temperature data.
 
-## アクセストークンの取得
+## Getting an Access Token
 
-1. https://cloud.ouraring.com/personal-access-tokens にアクセス（要ログイン）
-2. **"Create A New Personal Access Token"** をクリック
-3. トークンの用途を表す名前を入力（例: `oura-cli`）
-4. **"Create"** をクリック
-5. 表示されたトークンをコピー（この画面を閉じると二度と表示されない）
+1. Visit https://cloud.ouraring.com/personal-access-tokens (login required)
+2. Click **"Create A New Personal Access Token"**
+3. Enter a name describing the token's purpose (e.g. `oura-cli`)
+4. Click **"Create"**
+5. Copy the displayed token (it will not be shown again after closing this page)
 
-> **注意:** Oura Membership が有効なアカウントのみ API アクセスが可能。Gen3 / Oura Ring 4 でメンバーシップなしの場合は利用不可。
+> **Note:** API access requires an active Oura Membership. Not available for Gen3 / Oura Ring 4 without a membership.
 
-## セットアップ
+## Setup
 
 ```bash
-# 依存関係のインストール
+# Install dependencies
 uv sync
 
-# 取得したトークンを .env に設定
+# Set the token in .env
 echo "OURA_TOKEN=your_token_here" > .env
 ```
 
-## 使い方
+## Usage
 
 ```bash
 uv run oura.py <subcommand> [options]
 ```
 
-### サブコマンド
+### Subcommands
 
-| コマンド | 内容 |
+| Command | Description |
 |---|---|
-| `sleep` | 睡眠スコアとコントリビューター |
-| `readiness` | レディネススコアとコントリビューター |
-| `heartrate` | 心拍数の時系列データ（5分間隔） |
-| `temperature` | 体温偏差（レディネスデータから抽出） |
-| `all` | 上記すべて |
+| `sleep` | Sleep score and contributors |
+| `readiness` | Readiness score and contributors |
+| `heartrate` | Heart rate time-series data (5-minute intervals) |
+| `temperature` | Body temperature deviation (extracted from readiness data) |
+| `all` | All of the above |
 
-### オプション
+### Options
 
-| オプション | デフォルト | 説明 |
+| Option | Default | Description |
 |---|---|---|
-| `--start YYYY-MM-DD` | 7日前 | 開始日 |
-| `--end YYYY-MM-DD` | 今日 | 終了日 |
-| `--format {json,table}` | `table` | 出力フォーマット |
+| `--start YYYY-MM-DD` | 7 days ago | Start date |
+| `--end YYYY-MM-DD` | Today | End date |
+| `--format {json,table}` | `table` | Output format |
 | `--token TOKEN` | `$OURA_TOKEN` | Personal Access Token |
 
-## 実行例
+## Examples
 
 ```bash
-# 直近7日の睡眠データ（テーブル表示）
+# Sleep data for the last 7 days (table format)
 uv run oura.py sleep
 
-# 期間指定してレディネスを JSON で出力
+# Readiness data for a specific date range in JSON format
 uv run oura.py readiness --start 2026-03-01 --end 2026-03-28 --format json
 
-# 今日の心拍数
+# Heart rate for today
 uv run oura.py heartrate --start 2026-03-28 --end 2026-03-28
 
-# 体温偏差
+# Body temperature deviation
 uv run oura.py temperature --start 2026-03-01
 
-# すべてのデータをまとめて取得
+# Fetch all data at once
 uv run oura.py all --start 2026-03-27 --end 2026-03-28
 ```
 
-## データソース
+## Data Sources
 
-体温データは専用エンドポイントがないため、レディネスエンドポイント（`/v2/usercollection/daily_readiness`）から以下のフィールドを抽出している。
+Body temperature data has no dedicated endpoint, so it is extracted from the readiness endpoint (`/v2/usercollection/daily_readiness`) using the following fields:
 
-| フィールド | 説明 |
+| Field | Description |
 |---|---|
-| `temperature_deviation` | 個人ベースラインからの偏差（℃） |
-| `temperature_trend_deviation` | トレンド偏差（℃） |
-| `body_temperature_score` | 体温のレディネスへの貢献スコア（1–100） |
+| `temperature_deviation` | Deviation from personal baseline (°C) |
+| `temperature_trend_deviation` | Trend deviation (°C) |
+| `body_temperature_score` | Contribution of body temperature to readiness score (1–100) |
