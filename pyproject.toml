@@ -1,0 +1,21 @@
+[project]
+name = "oura"
+version = "0.1.0"
+description = "Oura Ring API v2 CLI wrapper"
+requires-python = ">=3.14"
+dependencies = [
+    "python-dotenv>=1.2.2",
+    "requests>=2.33.0",
+]
+
+[project.scripts]
+oura = "oura:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-mock>=3.15.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
