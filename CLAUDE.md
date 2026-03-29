@@ -35,3 +35,7 @@ Token is read from `$OURA_TOKEN` env var (loaded via `.env`) or `--token` flag. 
 ## Testing
 
 Tests use `pytest-mock` to mock HTTP responses — no real API calls are made. The test file mirrors the structure of `oura.py` with one test class per module section.
+
+## Rules
+
+- コードに修正を加えた際はREADME.md, README_ja.mdにも変更が必要か判断し、必要であればする。
