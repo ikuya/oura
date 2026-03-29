@@ -42,6 +42,7 @@ uv run oura.py <subcommand> [options]
 | `resilience` | Daily resilience level |
 | `cardiovascular_age` | Cardiovascular age estimate |
 | `vo2_max` | VO2 max fitness metric |
+| `scores` | Sleep and readiness scores side by side |
 | `all` | All biometric endpoints (sleep, readiness, heartrate, temperature, activity, stress, spo2, resilience, cardiovascular_age, vo2_max) — table format shows each section separately; `--format json` outputs a single combined JSON object |
 
 ### Options
@@ -68,6 +69,9 @@ uv run oura.py heartrate --date 2026-03-28
 
 # Body temperature deviation
 uv run oura.py temperature --start 2026-03-01
+
+# Sleep and readiness scores side by side
+uv run oura.py scores --start 2026-03-01 --end 2026-03-28
 
 # Fetch all data at once (table format)
 uv run oura.py all --start 2026-03-27 --end 2026-03-28

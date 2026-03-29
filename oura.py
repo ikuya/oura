@@ -113,6 +113,21 @@ class OuraClient:
             {"start_date": start, "end_date": end},
         )
 
+    def get_scores(self, start: str, end: str) -> list[dict]:
+        sleep_records = self.get_daily_sleep(start, end)
+        readiness_records = self.get_daily_readiness(start, end)
+        sleep_by_day = {r["day"]: r.get("score") for r in sleep_records if "day" in r}
+        readiness_by_day = {r["day"]: r.get("score") for r in readiness_records if "day" in r}
+        days = sorted(sleep_by_day.keys() | readiness_by_day.keys())
+        return [
+            {
+                "day": day,
+                "sleep_score": sleep_by_day.get(day),
+                "readiness_score": readiness_by_day.get(day),
+            }
+            for day in days
+        ]
+
 
 # --- Date helpers ---
 
@@ -215,6 +230,7 @@ def build_parser() -> argparse.ArgumentParser:
     for name, help_text in [
         ("sleep",             "Daily sleep scores and contributors"),
         ("readiness",         "Daily readiness scores and contributors"),
+        ("scores",            "Sleep and readiness scores side by side"),
         ("heartrate",         "Heart rate time series (5-min intervals)"),
         ("temperature",       "Body temperature deviation from readiness data"),
         ("activity",          "Daily activity summary and calorie breakdown"),
@@ -249,6 +265,9 @@ def main() -> None:
     try:
         if args.command == "sleep":
             _print_output(client.get_daily_sleep(args.start, args.end), args.format)
+
+        elif args.command == "scores":
+            _print_output(client.get_scores(args.start, args.end), args.format)
 
         elif args.command == "readiness":
             _print_output(client.get_daily_readiness(args.start, args.end), args.format)

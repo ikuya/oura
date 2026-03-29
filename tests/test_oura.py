@@ -285,6 +285,26 @@ class TestOuraClient:
         _, kwargs = mock_get.call_args
         assert kwargs["params"]["start_date"] == "2026-03-21"
 
+    def test_get_scores_merges_by_day(self, mocker):
+        sleep_data = [{"day": "2026-03-28", "score": 85}, {"day": "2026-03-29", "score": 90}]
+        readiness_data = [{"day": "2026-03-28", "score": 70}, {"day": "2026-03-29", "score": 75}]
+        mocker.patch.object(self.client, "get_daily_sleep", return_value=sleep_data)
+        mocker.patch.object(self.client, "get_daily_readiness", return_value=readiness_data)
+        result = self.client.get_scores("2026-03-28", "2026-03-29")
+        assert result == [
+            {"day": "2026-03-28", "sleep_score": 85, "readiness_score": 70},
+            {"day": "2026-03-29", "sleep_score": 90, "readiness_score": 75},
+        ]
+
+    def test_get_scores_missing_day(self, mocker):
+        sleep_data = [{"day": "2026-03-28", "score": 85}]
+        readiness_data = [{"day": "2026-03-28", "score": 70}, {"day": "2026-03-29", "score": 75}]
+        mocker.patch.object(self.client, "get_daily_sleep", return_value=sleep_data)
+        mocker.patch.object(self.client, "get_daily_readiness", return_value=readiness_data)
+        result = self.client.get_scores("2026-03-28", "2026-03-29")
+        assert len(result) == 2
+        assert result[1] == {"day": "2026-03-29", "sleep_score": None, "readiness_score": 75}
+
 
 # --- CLI (build_parser / main) ---
 

@@ -42,6 +42,7 @@ uv run oura.py <subcommand> [options]
 | `resilience` | 1日のレジリエンスレベル |
 | `cardiovascular_age` | 心血管年齢の推定値 |
 | `vo2_max` | VO2 max（最大酸素摂取量）フィットネス指標 |
+| `scores` | 睡眠スコアとレディネススコアを横並びで表示 |
 | `all` | 全 Biometric エンドポイント（sleep, readiness, heartrate, temperature, activity, stress, spo2, resilience, cardiovascular_age, vo2_max）— table 形式は各セクションを個別に表示、`--format json` で1つの統合 JSON として出力 |
 
 ### オプション
@@ -68,6 +69,9 @@ uv run oura.py heartrate --date 2026-03-28
 
 # 体温偏差
 uv run oura.py temperature --start 2026-03-01
+
+# 睡眠スコアとレディネススコアを横並びで表示
+uv run oura.py scores --start 2026-03-01 --end 2026-03-28
 
 # すべてのデータをまとめて取得（テーブル表示）
 uv run oura.py all --start 2026-03-27 --end 2026-03-28
