@@ -36,7 +36,13 @@ uv run oura.py <subcommand> [options]
 | `readiness` | レディネススコアとコントリビューター |
 | `heartrate` | 心拍数の時系列データ（5分間隔） |
 | `temperature` | 体温偏差（レディネスデータから抽出） |
-| `all` | 全 Biometric エンドポイント — table 形式は各セクションを個別に表示、`--format json` で1つの統合 JSON として出力 |
+| `activity` | 1日の活動量サマリーとカロリー内訳 |
+| `stress` | 1日のストレスレベル |
+| `spo2` | 血中酸素飽和度（SpO2） |
+| `resilience` | 1日のレジリエンスレベル |
+| `cardiovascular_age` | 心血管年齢の推定値 |
+| `vo2_max` | VO2 max（最大酸素摂取量）フィットネス指標 |
+| `all` | 全 Biometric エンドポイント（sleep, readiness, heartrate, temperature, activity, stress, spo2, resilience, cardiovascular_age, vo2_max）— table 形式は各セクションを個別に表示、`--format json` で1つの統合 JSON として出力 |
 
 ### オプション
 

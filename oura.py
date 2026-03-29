@@ -206,11 +206,17 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     for name, help_text in [
-        ("sleep", "Daily sleep scores and contributors"),
-        ("readiness", "Daily readiness scores and contributors"),
-        ("heartrate", "Heart rate time series (5-min intervals)"),
-        ("temperature", "Body temperature deviation from readiness data"),
-        ("all", "All of the above"),
+        ("sleep",             "Daily sleep scores and contributors"),
+        ("readiness",         "Daily readiness scores and contributors"),
+        ("heartrate",         "Heart rate time series (5-min intervals)"),
+        ("temperature",       "Body temperature deviation from readiness data"),
+        ("activity",          "Daily activity summary and calorie breakdown"),
+        ("stress",            "Daily stress levels"),
+        ("spo2",              "Blood oxygen saturation (SpO2)"),
+        ("resilience",        "Daily resilience level"),
+        ("cardiovascular_age", "Cardiovascular age estimate"),
+        ("vo2_max",           "VO2 max fitness metric"),
+        ("all",               "All of the above"),
     ]:
         sub = subparsers.add_parser(name, help=help_text)
         _add_common_args(sub)
@@ -241,6 +247,24 @@ def main() -> None:
 
         elif args.command == "temperature":
             _print_output(client.get_temperature(args.start, args.end), args.format)
+
+        elif args.command == "activity":
+            _print_output(client.get_daily_activity(args.start, args.end), args.format)
+
+        elif args.command == "stress":
+            _print_output(client.get_daily_stress(args.start, args.end), args.format)
+
+        elif args.command == "spo2":
+            _print_output(client.get_daily_spo2(args.start, args.end), args.format)
+
+        elif args.command == "resilience":
+            _print_output(client.get_daily_resilience(args.start, args.end), args.format)
+
+        elif args.command == "cardiovascular_age":
+            _print_output(client.get_daily_cardiovascular_age(args.start, args.end), args.format)
+
+        elif args.command == "vo2_max":
+            _print_output(client.get_vo2_max(args.start, args.end), args.format)
 
         elif args.command == "all":
             sections = [
