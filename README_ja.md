@@ -50,6 +50,7 @@ uv run oura.py <subcommand> [options]
 |---|---|---|
 | `--start YYYY-MM-DD` | 7日前 | 開始日 |
 | `--end YYYY-MM-DD` | 今日 | 終了日 |
+| `--date YYYY-MM-DD` | — | 1日分のデータを取得（`--start` / `--end` より優先） |
 | `--format {json,table}` | `table` | 出力フォーマット |
 | `--token TOKEN` | `$OURA_TOKEN` | Personal Access Token |
 
@@ -62,8 +63,8 @@ uv run oura.py sleep
 # 期間指定してレディネスを JSON で出力
 uv run oura.py readiness --start 2026-03-01 --end 2026-03-28 --format json
 
-# 今日の心拍数
-uv run oura.py heartrate --start 2026-03-28 --end 2026-03-28
+# 特定の1日の心拍数
+uv run oura.py heartrate --date 2026-03-28
 
 # 体温偏差
 uv run oura.py temperature --start 2026-03-01

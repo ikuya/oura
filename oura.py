@@ -185,6 +185,13 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
         help="End date (default: today)",
     )
     parser.add_argument(
+        "--date",
+        type=_validate_date,
+        default=None,
+        metavar="YYYY-MM-DD",
+        help="Fetch data for a single day (overrides --start and --end)",
+    )
+    parser.add_argument(
         "--format",
         choices=["json", "table"],
         default="table",
@@ -227,6 +234,10 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
+
+    if args.date:
+        args.start = args.date
+        args.end = args.date
 
     if not args.token:
         parser.error(

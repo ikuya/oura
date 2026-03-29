@@ -50,6 +50,7 @@ uv run oura.py <subcommand> [options]
 |---|---|---|
 | `--start YYYY-MM-DD` | 7 days ago | Start date |
 | `--end YYYY-MM-DD` | Today | End date |
+| `--date YYYY-MM-DD` | — | Fetch a single day (overrides `--start` and `--end`) |
 | `--format {json,table}` | `table` | Output format |
 | `--token TOKEN` | `$OURA_TOKEN` | Personal Access Token |
 
@@ -62,8 +63,8 @@ uv run oura.py sleep
 # Readiness data for a specific date range in JSON format
 uv run oura.py readiness --start 2026-03-01 --end 2026-03-28 --format json
 
-# Heart rate for today
-uv run oura.py heartrate --start 2026-03-28 --end 2026-03-28
+# Heart rate for a single day
+uv run oura.py heartrate --date 2026-03-28
 
 # Body temperature deviation
 uv run oura.py temperature --start 2026-03-01

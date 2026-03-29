@@ -316,6 +316,16 @@ class TestBuildParser:
             args = parser.parse_args(["--token", "tok", cmd])
             assert args.command == cmd
 
+    def test_date_option_parses(self):
+        parser = build_parser()
+        args = parser.parse_args(["--token", "tok", "sleep", "--date", "2026-03-28"])
+        assert args.date == "2026-03-28"
+
+    def test_date_default_is_none(self):
+        parser = build_parser()
+        args = parser.parse_args(["--token", "tok", "sleep"])
+        assert args.date is None
+
 
 class TestMain:
     def _run(self, argv, mock_client):
@@ -337,6 +347,11 @@ class TestMain:
         client.get_daily_cardiovascular_age.return_value = records
         client.get_vo2_max.return_value = records
         return client
+
+    def test_date_overrides_start_end(self, capsys):
+        client = self._make_client()
+        self._run(["--token", "tok", "sleep", "--date", "2026-03-28"], client)
+        client.get_daily_sleep.assert_called_once_with("2026-03-28", "2026-03-28")
 
     def test_sleep_command(self, capsys):
         client = self._make_client()
