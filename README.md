@@ -1,6 +1,6 @@
 # oura
 
-A CLI wrapper for the Oura Ring API v2. Retrieves sleep, readiness, heart rate, and body temperature data.
+A CLI wrapper for the Oura Ring API v2. Retrieves sleep, readiness, heart rate, body temperature, activity, stress, SpO2, resilience, cardiovascular age, and VO2 max data.
 
 ## Getting an Access Token
 
@@ -36,7 +36,7 @@ uv run oura.py <subcommand> [options]
 | `readiness` | Readiness score and contributors |
 | `heartrate` | Heart rate time-series data (5-minute intervals) |
 | `temperature` | Body temperature deviation (extracted from readiness data) |
-| `all` | All of the above |
+| `all` | All biometric endpoints — table format shows each section separately; `--format json` outputs a single combined JSON object |
 
 ### Options
 
@@ -62,8 +62,11 @@ uv run oura.py heartrate --start 2026-03-28 --end 2026-03-28
 # Body temperature deviation
 uv run oura.py temperature --start 2026-03-01
 
-# Fetch all data at once
+# Fetch all data at once (table format)
 uv run oura.py all --start 2026-03-27 --end 2026-03-28
+
+# Fetch all biometric data as a single JSON object
+uv run oura.py all --start 2026-03-27 --end 2026-03-28 --format json
 ```
 
 ## Data Sources

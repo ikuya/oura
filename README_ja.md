@@ -1,6 +1,6 @@
 # oura
 
-Oura Ring API v2 の CLI ラッパースクリプト。睡眠・レディネス・心拍数・体温データを取得できる。
+Oura Ring API v2 の CLI ラッパースクリプト。睡眠・レディネス・心拍数・体温・活動量・ストレス・SpO2・レジリエンス・心血管年齢・VO2 max データを取得できる。
 
 ## アクセストークンの取得
 
@@ -36,7 +36,7 @@ uv run oura.py <subcommand> [options]
 | `readiness` | レディネススコアとコントリビューター |
 | `heartrate` | 心拍数の時系列データ（5分間隔） |
 | `temperature` | 体温偏差（レディネスデータから抽出） |
-| `all` | 上記すべて |
+| `all` | 全 Biometric エンドポイント — table 形式は各セクションを個別に表示、`--format json` で1つの統合 JSON として出力 |
 
 ### オプション
 
@@ -62,8 +62,11 @@ uv run oura.py heartrate --start 2026-03-28 --end 2026-03-28
 # 体温偏差
 uv run oura.py temperature --start 2026-03-01
 
-# すべてのデータをまとめて取得
+# すべてのデータをまとめて取得（テーブル表示）
 uv run oura.py all --start 2026-03-27 --end 2026-03-28
+
+# すべての Biometric データを1つの JSON で取得
+uv run oura.py all --start 2026-03-27 --end 2026-03-28 --format json
 ```
 
 ## データソース

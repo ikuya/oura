@@ -224,6 +224,67 @@ class TestOuraClient:
             self.client.get_daily_sleep("2026-03-21", "2026-03-28")
         assert exc_info.value.status_code is None
 
+    def test_get_daily_activity(self, mocker):
+        expected = [{"day": "2026-03-28", "active_calories": 500}]
+        mock_get = mocker.patch.object(
+            self.client.session, "get", return_value=_make_response(expected)
+        )
+        result = self.client.get_daily_activity("2026-03-21", "2026-03-28")
+        assert result == expected
+        _, kwargs = mock_get.call_args
+        assert kwargs["params"]["start_date"] == "2026-03-21"
+        assert kwargs["params"]["end_date"] == "2026-03-28"
+
+    def test_get_daily_stress(self, mocker):
+        expected = [{"day": "2026-03-28", "stress_high": 120}]
+        mock_get = mocker.patch.object(
+            self.client.session, "get", return_value=_make_response(expected)
+        )
+        result = self.client.get_daily_stress("2026-03-21", "2026-03-28")
+        assert result == expected
+        _, kwargs = mock_get.call_args
+        assert kwargs["params"]["start_date"] == "2026-03-21"
+
+    def test_get_daily_spo2(self, mocker):
+        expected = [{"day": "2026-03-28", "spo2_percentage": {"average": 97.5}}]
+        mock_get = mocker.patch.object(
+            self.client.session, "get", return_value=_make_response(expected)
+        )
+        result = self.client.get_daily_spo2("2026-03-21", "2026-03-28")
+        assert result == expected
+        _, kwargs = mock_get.call_args
+        assert kwargs["params"]["start_date"] == "2026-03-21"
+
+    def test_get_daily_resilience(self, mocker):
+        expected = [{"day": "2026-03-28", "level": "solid"}]
+        mock_get = mocker.patch.object(
+            self.client.session, "get", return_value=_make_response(expected)
+        )
+        result = self.client.get_daily_resilience("2026-03-21", "2026-03-28")
+        assert result == expected
+        _, kwargs = mock_get.call_args
+        assert kwargs["params"]["start_date"] == "2026-03-21"
+
+    def test_get_daily_cardiovascular_age(self, mocker):
+        expected = [{"day": "2026-03-28", "vascular_age": 35}]
+        mock_get = mocker.patch.object(
+            self.client.session, "get", return_value=_make_response(expected)
+        )
+        result = self.client.get_daily_cardiovascular_age("2026-03-21", "2026-03-28")
+        assert result == expected
+        _, kwargs = mock_get.call_args
+        assert kwargs["params"]["start_date"] == "2026-03-21"
+
+    def test_get_vo2_max(self, mocker):
+        expected = [{"day": "2026-03-28", "vo2_max": 52.0}]
+        mock_get = mocker.patch.object(
+            self.client.session, "get", return_value=_make_response(expected)
+        )
+        result = self.client.get_vo2_max("2026-03-21", "2026-03-28")
+        assert result == expected
+        _, kwargs = mock_get.call_args
+        assert kwargs["params"]["start_date"] == "2026-03-21"
+
 
 # --- CLI (build_parser / main) ---
 
@@ -269,6 +330,12 @@ class TestMain:
         client.get_daily_readiness.return_value = records
         client.get_heartrate.return_value = records
         client.get_temperature.return_value = records
+        client.get_daily_activity.return_value = records
+        client.get_daily_stress.return_value = records
+        client.get_daily_spo2.return_value = records
+        client.get_daily_resilience.return_value = records
+        client.get_daily_cardiovascular_age.return_value = records
+        client.get_vo2_max.return_value = records
         return client
 
     def test_sleep_command(self, capsys):
@@ -298,6 +365,25 @@ class TestMain:
         client.get_daily_readiness.assert_called_once()
         client.get_heartrate.assert_called_once()
         client.get_temperature.assert_called_once()
+        client.get_daily_activity.assert_called_once()
+        client.get_daily_stress.assert_called_once()
+        client.get_daily_spo2.assert_called_once()
+        client.get_daily_resilience.assert_called_once()
+        client.get_daily_cardiovascular_age.assert_called_once()
+        client.get_vo2_max.assert_called_once()
+
+    def test_all_command_json_output(self, capsys):
+        records = [{"day": "2026-03-28", "score": 85}]
+        client = self._make_client(records)
+        self._run(["--token", "tok", "all", "--format", "json"], client)
+        out = capsys.readouterr().out
+        parsed = json.loads(out)
+        assert set(parsed.keys()) == {
+            "sleep", "readiness", "heartrate", "temperature",
+            "activity", "stress", "spo2", "resilience",
+            "cardiovascular_age", "vo2_max",
+        }
+        assert parsed["sleep"] == records
 
     def test_json_format_output(self, capsys):
         client = self._make_client([{"day": "2026-03-28", "score": 85}])
@@ -319,3 +405,22 @@ class TestMain:
         with pytest.raises(SystemExit) as exc_info:
             self._run(["--token", "tok", "sleep"], client)
         assert exc_info.value.code == 1
+
+    def test_api_error_json_format_outputs_json(self, capsys):
+        client = MagicMock()
+        client.get_daily_sleep.side_effect = OuraAPIError(404, "HTTP 404: Not Found")
+        with pytest.raises(SystemExit):
+            self._run(["--token", "tok", "sleep", "--format", "json"], client)
+        out = capsys.readouterr().out
+        parsed = json.loads(out)
+        assert parsed["status_code"] == 404
+        assert "error" in parsed
+
+    def test_api_error_table_format_outputs_to_stderr(self, capsys):
+        client = MagicMock()
+        client.get_daily_sleep.side_effect = OuraAPIError(404, "HTTP 404: Not Found")
+        with pytest.raises(SystemExit):
+            self._run(["--token", "tok", "sleep"], client)
+        out, err = capsys.readouterr()
+        assert out == ""
+        assert "Error:" in err

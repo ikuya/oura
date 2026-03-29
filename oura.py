@@ -77,6 +77,42 @@ class OuraClient:
             for r in records
         ]
 
+    def get_daily_activity(self, start: str, end: str) -> list[dict]:
+        return self._get(
+            "/v2/usercollection/daily_activity",
+            {"start_date": start, "end_date": end},
+        )
+
+    def get_daily_stress(self, start: str, end: str) -> list[dict]:
+        return self._get(
+            "/v2/usercollection/daily_stress",
+            {"start_date": start, "end_date": end},
+        )
+
+    def get_daily_spo2(self, start: str, end: str) -> list[dict]:
+        return self._get(
+            "/v2/usercollection/daily_spo2",
+            {"start_date": start, "end_date": end},
+        )
+
+    def get_daily_resilience(self, start: str, end: str) -> list[dict]:
+        return self._get(
+            "/v2/usercollection/daily_resilience",
+            {"start_date": start, "end_date": end},
+        )
+
+    def get_daily_cardiovascular_age(self, start: str, end: str) -> list[dict]:
+        return self._get(
+            "/v2/usercollection/daily_cardiovascular_age",
+            {"start_date": start, "end_date": end},
+        )
+
+    def get_vo2_max(self, start: str, end: str) -> list[dict]:
+        return self._get(
+            "/v2/usercollection/vo2_max",
+            {"start_date": start, "end_date": end},
+        )
+
 
 # --- Date helpers ---
 
@@ -208,17 +244,50 @@ def main() -> None:
 
         elif args.command == "all":
             sections = [
-                ("Sleep", client.get_daily_sleep),
-                ("Readiness", client.get_daily_readiness),
-                ("Heart Rate", client.get_heartrate),
-                ("Temperature", client.get_temperature),
+                ("Sleep",              "sleep",              client.get_daily_sleep),
+                ("Readiness",          "readiness",          client.get_daily_readiness),
+                ("Heart Rate",         "heartrate",          client.get_heartrate),
+                ("Temperature",        "temperature",        client.get_temperature),
+                ("Activity",           "activity",           client.get_daily_activity),
+                ("Stress",             "stress",             client.get_daily_stress),
+                ("SpO2",               "spo2",               client.get_daily_spo2),
+                ("Resilience",         "resilience",         client.get_daily_resilience),
+                ("Cardiovascular Age", "cardiovascular_age", client.get_daily_cardiovascular_age),
+                ("VO2 Max",            "vo2_max",            client.get_vo2_max),
             ]
-            for title, fetch in sections:
-                print(f"\n=== {title} ===")
-                _print_output(fetch(args.start, args.end), args.format)
+            _null_fields: dict[str, list[str]] = {
+                "sleep":              ["day", "score"],
+                "readiness":          ["day", "score"],
+                "heartrate":          ["bpm", "timestamp"],
+                "temperature":        ["day", "temperature_deviation", "temperature_trend_deviation", "body_temperature_score"],
+                "activity":           ["day", "active_calories"],
+                "stress":             ["day", "stress_high"],
+                "spo2":               ["day", "spo2_percentage"],
+                "resilience":         ["day", "level"],
+                "cardiovascular_age": ["day", "vascular_age"],
+                "vo2_max":            ["day", "vo2_max"],
+            }
+            if args.format == "json":
+                data = {}
+                for _, key, fetch in sections:
+                    try:
+                        data[key] = fetch(args.start, args.end)
+                    except OuraAPIError:
+                        data[key] = [{f: None for f in _null_fields[key]}]
+                print(json.dumps(data, ensure_ascii=False, indent=2))
+            else:
+                for title, key, fetch in sections:
+                    print(f"\n=== {title} ===")
+                    try:
+                        _print_output(fetch(args.start, args.end), args.format)
+                    except OuraAPIError as e:
+                        print(f"Error: {e.message}", file=sys.stderr)
 
     except OuraAPIError as e:
-        print(f"Error: {e.message}", file=sys.stderr)
+        if args.format == "json":
+            print(json.dumps({"error": e.message, "status_code": e.status_code}, ensure_ascii=False))
+        else:
+            print(f"Error: {e.message}", file=sys.stderr)
         sys.exit(1)
 
 
