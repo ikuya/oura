@@ -13,4 +13,4 @@ wheels/
 .env
 
 # Claude Code
-.claude/
+.claude/skills/update-readme
