@@ -115,10 +115,12 @@ class TestFormatTable:
 
 # --- OuraClient ---
 
-def _make_response(data: list, status_code: int = 200) -> MagicMock:
+def _make_response(
+    data: list, status_code: int = 200, next_token: str | None = None
+) -> MagicMock:
     resp = MagicMock()
     resp.status_code = status_code
-    resp.json.return_value = {"data": data}
+    resp.json.return_value = {"data": data, "next_token": next_token}
     resp.raise_for_status = MagicMock()
     return resp
 
@@ -282,8 +284,39 @@ class TestOuraClient:
         )
         result = self.client.get_vo2_max("2026-03-21", "2026-03-28")
         assert result == expected
-        _, kwargs = mock_get.call_args
+        args, kwargs = mock_get.call_args
+        # The endpoint path is case-sensitive: "vO2_max", not "vo2_max".
+        assert args[0] == "https://api.ouraring.com/v2/usercollection/vO2_max"
         assert kwargs["params"]["start_date"] == "2026-03-21"
+
+    def test_get_follows_next_token(self, mocker):
+        mock_get = mocker.patch.object(
+            self.client.session,
+            "get",
+            side_effect=[
+                _make_response([{"bpm": 60}], next_token="page-2"),
+                _make_response([{"bpm": 61}], next_token="page-3"),
+                _make_response([{"bpm": 62}]),
+            ],
+        )
+        result = self.client.get_heartrate("2026-03-28", "2026-03-28")
+        assert result == [{"bpm": 60}, {"bpm": 61}, {"bpm": 62}]
+        assert mock_get.call_count == 3
+        tokens = [c.kwargs["params"].get("next_token") for c in mock_get.call_args_list]
+        assert tokens == [None, "page-2", "page-3"]
+
+    def test_get_stops_on_repeated_next_token(self, mocker):
+        mock_get = mocker.patch.object(
+            self.client.session,
+            "get",
+            side_effect=[
+                _make_response([{"bpm": 60}], next_token="stuck"),
+                _make_response([{"bpm": 61}], next_token="stuck"),
+            ],
+        )
+        result = self.client.get_heartrate("2026-03-28", "2026-03-28")
+        assert result == [{"bpm": 60}, {"bpm": 61}]
+        assert mock_get.call_count == 2
 
     def test_get_scores_merges_by_day(self, mocker):
         sleep_data = [{"day": "2026-03-28", "score": 85}, {"day": "2026-03-29", "score": 90}]

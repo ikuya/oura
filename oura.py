@@ -29,8 +29,7 @@ class OuraClient:
         self.session = requests.Session()
         self.session.headers.update({"Authorization": f"Bearer {token}"})
 
-    def _get(self, path: str, params: dict) -> list[dict]:
-        url = BASE_URL + path
+    def _get_page(self, url: str, params: dict) -> dict:
         try:
             response = self.session.get(url, params=params, timeout=API_TIMEOUT)
             response.raise_for_status()
@@ -42,7 +41,23 @@ class OuraClient:
             raise OuraAPIError(status, msg) from e
         except requests.exceptions.RequestException as e:
             raise OuraAPIError(None, f"Request failed: {e}") from e
-        return response.json().get("data", [])
+        return response.json()
+
+    def _get(self, path: str, params: dict) -> list[dict]:
+        """Fetch every page of a collection, following the API's next_token cursor."""
+        url = BASE_URL + path
+        records: list[dict] = []
+        next_token: str | None = None
+        seen_tokens: set[str] = set()
+        while True:
+            page_params = params if next_token is None else {**params, "next_token": next_token}
+            payload = self._get_page(url, page_params)
+            records.extend(payload.get("data", []))
+            next_token = payload.get("next_token")
+            # Guard against a server that keeps handing back the same cursor.
+            if not next_token or next_token in seen_tokens:
+                return records
+            seen_tokens.add(next_token)
 
     def get_daily_sleep(self, start: str, end: str) -> list[dict]:
         return self._get(
@@ -109,7 +124,7 @@ class OuraClient:
 
     def get_vo2_max(self, start: str, end: str) -> list[dict]:
         return self._get(
-            "/v2/usercollection/vo2_max",
+            "/v2/usercollection/vO2_max",
             {"start_date": start, "end_date": end},
         )
 
